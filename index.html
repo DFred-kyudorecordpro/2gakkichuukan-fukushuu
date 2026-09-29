@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公共・政治経済・倫理 一問一答 4択クイズ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icon CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti CDN for high score animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        .animate-pop {
+            animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* Touch friendly interaction feedback */
+        .choice-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 md:p-6">
+
+    <!-- Main Container -->
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden my-auto">
+        
+        <!-- Header Bar -->
+        <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white p-5 text-center relative">
+            <div class="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold tracking-wider uppercase mb-1">
+                高校定期テスト・共通テスト対策
+            </div>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center justify-center gap-2">
+                <i class="fa-solid font-bold fa-book-bookmark text-yellow-300"></i>
+                公共・政治経済・倫理 一問一答
+            </h1>
+            <p class="text-xs sm:text-sm text-indigo-100 mt-1 opacity-90">全64問から20問をランダム抽出！何度でも挑戦可能</p>
+        </header>
+
+        <!-- Dynamic Screen Content -->
+        <main id="app-content" class="p-4 sm:p-6">
+            <!-- Screen 1: Start Screen (Rendered by JS) -->
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-50 border-t border-slate-100 p-3 text-center text-xs text-slate-400">
+            公共・政治経済・倫理 一問一答 演習アプリ &copy; 2026
+        </footer>
+    </div>
+
+    <script>
+        // 1. ALL 64 QUESTIONS DATASET
+        const ALL_QUESTIONS = [
+            // 第1章 (1-20)
+            { id: 1, chapter: "第1章", q: "子供から大人への過渡期にあたり、心身ともに大きな変化に直面する時期。", a: "青年期" },
+            { id: 2, chapter: "第1章", q: "青年期の身体的特徴を指し、特に性的な機能が成熟すること。", a: "第二次性徴" },
+            { id: 3, chapter: "第1章", q: "ドイツの心理学者レヴィンがよんだ、子供と大人の境界に生きる人間。", a: "境界人(マージナルマン)" },
+            { id: 4, chapter: "第1章", q: "フランスの哲学者ルソーが著書「エミール」で示した、青年期を指す言葉。", a: "第二の誕生" },
+            { id: 5, chapter: "第1章", q: "青年が悩みと向き合うために、社会的な責任や義務を猶予されている状態。", a: "モラトリアム" },
+            { id: 6, chapter: "第1章", q: "SNSで「いいね」を欲しがるように、人に認められたい欲求。", a: "承認欲求" },
+            { id: 7, chapter: "第1章", q: "欲求が満たされず、緊張が高まった状態。", a: "欲求不満(フラストレーション)" },
+            { id: 8, chapter: "第1章", q: "欲求不満に陥ったとき、自分を守るために無意識に行われる心の働き。", a: "防衛機制" },
+            { id: 9, chapter: "第1章", q: "「人は女に生まれるのではない、女になるのだ」という言葉を残したフランスの思想家。", a: "ボーヴォワール" },
+            { id: 10, chapter: "第1章", q: "社会的につくられた性差。", a: "ジェンダー" },
+            { id: 11, chapter: "第1章", q: "性的指向が同性や男女両方に向かう人たちや、心と体の性が不一致である性自認の人たちなどのような性的少数者の総称。", a: "LGBTQ+" },
+            { id: 12, chapter: "第1章", q: "愛(アガペー)を説いたイエスを救世主とする宗教。", a: "キリスト教" },
+            { id: 13, chapter: "第1章", q: "預言者ムハンマドにより創始された、唯一神アッラーへの絶対的帰依を説く宗教。", a: "イスラーム(イスラム教)" },
+            { id: 14, chapter: "第1章", q: "ガウタマ=シッダールタ(ブッダ)により創始された宗教。", a: "仏教" },
+            { id: 15, chapter: "第1章", q: "近代西洋の思想を乗り越えた独自の哲学をつくろうとした人物。", a: "西田幾多郎" },
+            { id: 16, chapter: "第1章", q: "盆、大みそか、正月といった、毎年同じ時期に行われる伝承的な行事。", a: "年中行事" },
+            { id: 17, chapter: "第1章", q: "七五三、成人式、結婚式、葬式など、人生の節目に行われる儀式。", a: "通過儀礼" },
+            { id: 18, chapter: "第1章", q: "大衆文化、都市文化、若者文化といったものが中心となった文化。", a: "サブカルチャー" },
+            { id: 19, chapter: "第1章", q: "家庭での家事や育児・介護、ボランティアなど「支払われない労働」のこと。", a: "アンペイド・ワーク" },
+            { id: 20, chapter: "第1章", q: "ある職業に就いて、その仕事こそが自分に向いていると自覚すること。", a: "職業的同一性" },
+
+            // 第2章 (21-40)
+            { id: 21, chapter: "第2章", q: "先進国において大量の食料が食べられることなく廃棄されるという課題。", a: "フードロス" },
+            { id: 22, chapter: "第2章", q: "温室効果ガスを大量に発生させることで起こっている気候変動に関する課題。", a: "地球温暖化" },
+            { id: 23, chapter: "第2章", q: "妊娠中に胎児の健康状態を把握する検査。", a: "出生前診断" },
+            { id: 24, chapter: "第2章", q: "特定の遺伝子を編集する技術。", a: "ゲノム編集技術" },
+            { id: 25, chapter: "第2章", q: "医師の投薬などにより、苦痛の少ない方法で死を選ぶこと。", a: "安楽死" },
+            { id: 26, chapter: "第2章", q: "「不知の自覚(無知の知)」をみずからの思想の基礎にした古代ギリシアの哲学者。", a: "ソクラテス" },
+            { id: 27, chapter: "第2章", q: "ソクラテスの弟子で、彼に大きな影響を受け、ギリシア哲学を発展させた人物。", a: "プラトン" },
+            { id: 28, chapter: "第2章", q: "プラトンの弟子で、さまざまな学問の基礎を確立した人物。", a: "アリストテレス" },
+            { id: 29, chapter: "第2章", q: "ソクラテスが用いた、他者との対話で新たな発見を促す方法。", a: "問答法" },
+            { id: 30, chapter: "第2章", q: "プラトンの説く、絶対的な美や善、真理。", a: "イデア" },
+            { id: 31, chapter: "第2章", q: "プラトンの説く、イデアに憧れる気持ち。", a: "エロス" },
+            { id: 32, chapter: "第2章", q: "アリストテレスが最も重要なものとした、信頼と親愛の情。", a: "友愛(フィリア)" },
+            { id: 33, chapter: "第2章", q: "理性に基づく道徳法則に従うべきとしたドイツの哲学者。", a: "カント" },
+            { id: 34, chapter: "第2章", q: "功利主義の考えを築いたイギリスの哲学者・法学者。", a: "ベンサム" },
+            { id: 35, chapter: "第2章", q: "快を感覚的快楽と精神的快楽に分け、精神的快楽をより高いものとして重視したイギリスの哲学者・経済学者。", a: "ミル" },
+            { id: 36, chapter: "第2章", q: "義務論や功利主義の問題を乗り越えようと登場した、人間のあり方自体問題にし、徳を身につけて現実に立ち向かう態度を重視する考え方。", a: "徳倫理学" },
+            { id: 37, chapter: "第2章", q: "ハーバーマスが重視した、コミュニケーションに基づく合意。", a: "対話的理性" },
+            { id: 38, chapter: "第2章", q: "アメリカの哲学者で公正としての正義を示し、財の公正な分配を主張した人物。", a: "ロールズ" },
+            { id: 39, chapter: "第2章", q: "ロールズが提唱する、社会のしくみには公正性と平等性が求められるとする考え方。", a: "正義の二原理" },
+            { id: 40, chapter: "第2章", q: "財の分配ではなく、「何ができるようになるか」という潜在能力(ケイパビリティ)を広げることで、実質的平等が保障されると説いたインドの経済学者。", a: "セン" },
+
+            // 第3章 (41-64)
+            { id: 41, chapter: "第3章", q: "誰もが生まれながらに平等にもっている、人間らしく生きる権利。", a: "自然権" },
+            { id: 42, chapter: "第3章", q: "自然権をよりよく守るために人々が国家をつくるという互いの約束。", a: "社会契約" },
+            { id: 43, chapter: "第3章", q: "憲法によって国家の権力を制限しようとする考え方。", a: "近代立憲主義" },
+            { id: 44, chapter: "第3章", q: "国民主権に基づく政治のあり方。", a: "民主主義" },
+            { id: 45, chapter: "第3章", q: "政治は、国家権力も従うべきルール(法)によって行われるべきだという考え方。", a: "法の支配" },
+            { id: 46, chapter: "第3章", q: "1946年11月3日公布、翌年5月3日に施行された日本の最高法規。", a: "日本国憲法" },
+            { id: 47, chapter: "第3章", q: "「国政は、国民の厳粛な信託による」と宣言されている日本国憲法三大原理の一つ。", a: "国民主権" },
+            { id: 48, chapter: "第3章", q: "「侵すことのできない永久の権利」と記されている日本国憲法三大原理の一つ。", a: "基本的人権の尊重" },
+            { id: 49, chapter: "第3章", q: "憲法9条で定められている日本国憲法三大原理の一つ。", a: "平和主義" },
+            { id: 50, chapter: "第3章", q: "人は生まれながらにして平等であるということを保障している権利。", a: "平等権" },
+            { id: 51, chapter: "第3章", q: "障がいの有無にかかわらず、一般社会で共に生きようとする考え方。", a: "ノーマライゼーション" },
+            { id: 52, chapter: "第3章", q: "国家から不当な制限や干渉を受けないことを保障している権利。", a: "自由権" },
+            { id: 53, chapter: "第3章", q: "憲法21条で保障されている、ある考えを話すなどして他人に伝える自由。", a: "表現の自由" },
+            { id: 54, chapter: "第3章", q: "憲法20条で禁じられている政治と宗教の関わりを禁じる原則。", a: "政教分離原則" },
+            { id: 55, chapter: "第3章", q: "自由権の一つで、人間らしく生きるために身体的な苦痛や束縛を受けないこと。", a: "身体的自由" },
+            { id: 56, chapter: "第3章", q: "人の自由や権利を保障するために国に介入を求める権利。", a: "社会権" },
+            { id: 57, chapter: "第3章", q: "憲法25条で保障されている、健康で文化的な最低限度の生活を営む権利。", a: "生存権" },
+            { id: 58, chapter: "第3章", q: "憲法15条で保障されている、成年者による普通選挙により公務員を選定する権利。", a: "選挙権" },
+            { id: 59, chapter: "第3章", q: "新しい人権の一つで、人間がよりよい環境のなかで生きていくための権利。", a: "環境権" },
+            { id: 60, chapter: "第3章", q: "「放っておいてもらう権利」から発展した、「自己情報コントロール(閲覧・訂正・抹消)权」とされている権利。", a: "プライバシーの権利" },
+            { id: 61, chapter: "第3章", q: "国民が政治に関する意思決定を行うため、政府に情報開示を求める権利。", a: "知る権利" },
+            { id: 62, chapter: "第3章", q: "インターネット上に蓄積された個人情報の削除を求める権利。", a: "忘れられる権利" },
+            { id: 63, chapter: "第3章", q: "人間が人生の重要な決断をみずから行う権利。", a: "自己決定権" },
+            { id: 64, chapter: "第3章", q: "対立する個人間の利益を調整する原理。", a: "公共の福祉" }
+        ];
+
+        // Unique Answers Pool for Dummy Generation
+        const ALL_ANSWERS = Array.from(new Set(ALL_QUESTIONS.map(item => item.a)));
+
+        // App State
+        let currentQuizList = [];
+        let currentIndex = 0;
+        let score = 0;
+        let userAnswers = []; // History array { questionObj, options, selected, isCorrect }
+        let isAnswered = false;
+        let reviewFilter = 'all'; // 'all', 'wrong', 'correct'
+
+        const QUIZ_COUNT = 20;
+
+        // Utility: Fisher-Yates Shuffle
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Initialize App
+        function initApp() {
+            showStartScreen();
+        }
+
+        // --- SCREEN 1: START SCREEN ---
+        function showStartScreen() {
+            const container = document.getElementById('app-content');
+            container.innerHTML = `
+                <div class="animate-fade-in text-center py-4 sm:py-6">
+                    <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-5 text-3xl shadow-inner">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">一問一答 択一テスト</h2>
+                    <p class="text-slate-600 text-sm max-w-md mx-auto mb-6 leading-relaxed">
+                        第1章（青年期・人間関係）、第2章（環境・医療・倫理思想）、第3章（民主政治・憲法・人権）からランダムで<strong class="text-indigo-600 font-bold">20問</strong>が出題されます。
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-2 max-w-sm mx-auto mb-8 text-xs text-slate-600">
+                        <div class="bg-slate-100 p-2.5 rounded-xl border border-slate-200">
+                            <i class="fa-solid fa-layer-group text-indigo-500 mb-1 block text-base"></i>
+                            全64問収録
+                        </div>
+                        <div class="bg-slate-100 p-2.5 rounded-xl border border-slate-200">
+                            <i class="fa-solid fa-shuffle text-indigo-500 mb-1 block text-base"></i>
+                            毎回ランダム
+                        </div>
+                        <div class="bg-slate-100 p-2.5 rounded-xl border border-slate-200">
+                            <i class="fa-solid fa-chart-line text-indigo-500 mb-1 block text-base"></i>
+                            復習機能付き
+                        </div>
+                    </div>
+
+                    <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95 text-base flex items-center justify-center gap-2 mx-auto">
+                        <i class="fa-solid fa-play"></i>
+                        テストを開始する
+                    </button>
+                </div>
+            `;
+        }
+
+        // Start Quiz Logic
+        function startQuiz() {
+            // Select 20 random questions
+            const shuffledQuestions = shuffle(ALL_QUESTIONS);
+            currentQuizList = shuffledQuestions.slice(0, QUIZ_COUNT).map(q => {
+                // Generate 3 unique dummy answers
+                const dummyPool = ALL_ANSWERS.filter(ans => ans !== q.a);
+                const shuffledDummies = shuffle(dummyPool).slice(0, 3);
+                // Combine & shuffle options
+                const options = shuffle([q.a, ...shuffledDummies]);
+                return {
+                    questionObj: q,
+                    options: options
+                };
+            });
+
+            currentIndex = 0;
+            score = 0;
+            userAnswers = [];
+            isAnswered = false;
+
+            renderQuestion();
+        }
+
+        // --- SCREEN 2: QUESTION SCREEN ---
+        function renderQuestion() {
+            isAnswered = false;
+            const currentData = currentQuizList[currentIndex];
+            const qObj = currentData.questionObj;
+            const options = currentData.options;
+
+            const progressPercent = ((currentIndex + 1) / QUIZ_COUNT) * 100;
+
+            const container = document.getElementById('app-content');
+            container.innerHTML = `
+                <div class="animate-fade-in">
+                    <!-- Progress Header -->
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+                        <span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
+                            ${qObj.chapter}
+                        </span>
+                        <span>問題 ${currentIndex + 1} / ${QUIZ_COUNT}</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 rounded-full h-2 mb-6 overflow-hidden">
+                        <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+                    </div>
+
+                    <!-- Question Box -->
+                    <div class="bg-slate-50 rounded-2xl p-5 sm:p-6 mb-6 border border-slate-200/80 shadow-sm relative">
+                        <span class="text-xs font-bold text-slate-400 block mb-1">【問題】</span>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 leading-snug">
+                            ${qObj.q}
+                        </h3>
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div id="options-container" class="grid grid-cols-1 gap-3 mb-6">
+                        ${options.map((optionText, idx) => `
+                            <button onclick="handleSelectOption(${idx}, '${escapeHtml(optionText)}')" 
+                                id="opt-btn-${idx}"
+                                class="choice-btn w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-400 bg-white text-slate-700 font-medium text-sm sm:text-base transition-all duration-150 flex items-center justify-between group">
+                                <span class="flex items-center gap-3">
+                                    <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                        ${['A', 'B', 'C', 'D'][idx]}
+                                    </span>
+                                    <span>${escapeHtml(optionText)}</span>
+                                </span>
+                                <i class="status-icon fa-regular fa-circle text-slate-300 text-lg opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- Feedback Area (Hidden initially) -->
+                    <div id="feedback-area" class="hidden rounded-xl p-4 mb-6 animate-pop"></div>
+
+                    <!-- Next Button Container -->
+                    <div class="flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="hidden w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                            <span>${currentIndex < QUIZ_COUNT - 1 ? '次の問題へ' : '結果を見る'}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper to escape special HTML characters
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Handle Choice Selection
+        function handleSelectOption(selectedIndex, selectedText) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const currentData = currentQuizList[currentIndex];
+            const correctAnswer = currentData.questionObj.a;
+            const isCorrect = (selectedText === correctAnswer);
+
+            if (isCorrect) score++;
+
+            // Save to history
+            userAnswers.push({
+                questionObj: currentData.questionObj,
+                options: currentData.options,
+                selected: selectedText,
+                isCorrect: isCorrect
+            });
+
+            // Update UI for choices
+            currentData.options.forEach((opt, idx) => {
+                const btn = document.getElementById(`opt-btn-${idx}`);
+                const icon = btn.querySelector('.status-icon');
+                btn.disabled = true;
+                btn.classList.remove('hover:border-indigo-400');
+
+                if (opt === correctAnswer) {
+                    // Correct Choice Styling
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900', 'font-bold');
+                    icon.className = 'status-icon fa-solid fa-circle-check text-emerald-600 text-xl opacity-100';
+                } else if (idx === selectedIndex && !isCorrect) {
+                    // Wrong Selected Choice Styling
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-rose-400', 'bg-rose-50', 'text-rose-900');
+                    icon.className = 'status-icon fa-solid fa-circle-xmark text-rose-500 text-xl opacity-100';
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            // Feedback Message Box
+            const feedbackArea = document.getElementById('feedback-area');
+            feedbackArea.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackArea.className = 'rounded-xl p-4 mb-6 bg-emerald-100 border border-emerald-300 text-emerald-900 flex items-start gap-3 animate-pop';
+                feedbackArea.innerHTML = `
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-2xl mt-0.5"></i>
+                    <div>
+                        <div class="font-bold text-base">正解！</div>
+                        <div class="text-xs text-emerald-800 mt-0.5">素晴らしい！正解は「<strong>${escapeHtml(correctAnswer)}</strong>」です。</div>
+                    </div>
+                `;
+            } else {
+                feedbackArea.className = 'rounded-xl p-4 mb-6 bg-rose-100 border border-rose-300 text-rose-900 flex items-start gap-3 animate-pop';
+                feedbackArea.innerHTML = `
+                    <i class="fa-solid fa-circle-xmark text-rose-600 text-2xl mt-0.5"></i>
+                    <div>
+                        <div class="font-bold text-base">不正解...</div>
+                        <div class="text-xs text-rose-800 mt-0.5">正解は 「<strong class="text-emerald-800 underline">${escapeHtml(correctAnswer)}</strong>」 でした。</div>
+                    </div>
+                `;
+            }
+
+            // Show Next Button
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            if (currentIndex < QUIZ_COUNT - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResultScreen();
+            }
+        }
+
+        // --- SCREEN 3: RESULT SCREEN ---
+        function showResultScreen() {
+            const percentage = Math.round((score / QUIZ_COUNT) * 100);
+
+            // Determine Rank and Message
+            let rank = 'C';
+            let rankColor = 'text-slate-600';
+            let rankBg = 'bg-slate-100 border-slate-300';
+            let message = 'もう少し！テキストを復習して再挑戦しよう。';
+
+            if (percentage === 100) {
+                rank = 'S+';
+                rankColor = 'text-yellow-500';
+                rankBg = 'bg-yellow-50 border-yellow-300';
+                message = 'パーフェクト！完璧な理解度です！';
+            } else if (percentage >= 80) {
+                rank = 'S';
+                rankColor = 'text-indigo-600';
+                rankBg = 'bg-indigo-50 border-indigo-300';
+                message = '素晴らしい！高得点達成です！';
+            } else if (percentage >= 60) {
+                rank = 'A';
+                rankColor = 'text-emerald-600';
+                rankBg = 'bg-emerald-50 border-emerald-300';
+                message = '合格ライン突破！ミスした単語を確認しましょう。';
+            } else if (percentage >= 40) {
+                rank = 'B';
+                rankColor = 'text-amber-600';
+                rankBg = 'bg-amber-50 border-amber-300';
+                message = '基本用語の復習がオススメです。';
+            }
+
+            // Trigger Confetti for High Score (80%+)
+            if (percentage >= 80 && typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            const container = document.getElementById('app-content');
+            container.innerHTML = `
+                <div class="animate-fade-in text-center">
+                    
+                    <!-- Result Summary Card -->
+                    <div class="border ${rankBg} rounded-2xl p-6 mb-6 shadow-sm">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">SCORE REPORT</span>
+                        
+                        <div class="flex items-center justify-center gap-4 my-3">
+                            <div class="text-center">
+                                <div class="text-4xl sm:text-5xl font-black ${rankColor}">
+                                    ${score} <span class="text-xl sm:text-2xl font-bold text-slate-400">/ ${QUIZ_COUNT}</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-500 mt-1">正解数</div>
+                            </div>
+                            <div class="h-10 w-px bg-slate-200"></div>
+                            <div class="text-center">
+                                <div class="text-4xl sm:text-5xl font-black ${rankColor}">
+                                    ${percentage}<span class="text-xl sm:text-2xl font-bold text-slate-400">%</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-500 mt-1">正答率</div>
+                            </div>
+                        </div>
+
+                        <div class="inline-block px-4 py-1 bg-white rounded-full text-xs font-bold shadow-sm ${rankColor} border border-slate-200 mb-2">
+                            ランク: ${rank}
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1">${message}</p>
+                    </div>
+
+                    <!-- Retry Button -->
+                    <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95 text-base flex items-center justify-center gap-2 mx-auto mb-8">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        もう一度挑戦する（ランダム出題）
+                    </button>
+
+                    <!-- Review Section Header -->
+                    <div class="border-t border-slate-200 pt-6 text-left">
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-indigo-600"></i>
+                                問題の復習リスト (${userAnswers.length}問)
+                            </h3>
+                            
+                            <!-- Filter Buttons -->
+                            <div class="flex rounded-lg bg-slate-100 p-1 text-xs font-medium">
+                                <button onclick="filterReview('all')" id="filter-all" class="px-2.5 py-1 rounded-md transition-all bg-white shadow-sm font-bold text-slate-800">すべて</button>
+                                <button onclick="filterReview('wrong')" id="filter-wrong" class="px-2.5 py-1 rounded-md transition-all text-slate-500 hover:text-slate-800">誤答のみ</button>
+                                <button onclick="filterReview('correct')" id="filter-correct" class="px-2.5 py-1 rounded-md transition-all text-slate-500 hover:text-slate-800">正解のみ</button>
+                            </div>
+                        </div>
+
+                        <!-- Review List Container -->
+                        <div id="review-list" class="space-y-3">
+                            ${generateReviewListHTML('all')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Review List Item HTML
+        function generateReviewListHTML(filter) {
+            reviewFilter = filter;
+            const filtered = userAnswers.filter(item => {
+                if (filter === 'wrong') return !item.isCorrect;
+                if (filter === 'correct') return item.isCorrect;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                return `
+                    <div class="text-center py-8 text-slate-400 text-xs">
+                        <i class="fa-solid fa-inbox text-2xl mb-2 block"></i>
+                        該当する問題はありません
+                    </div>
+                `;
+            }
+
+            return filtered.map((item, idx) => `
+                <div class="p-4 rounded-xl border ${item.isCorrect ? 'border-slate-200 bg-white' : 'border-rose-200 bg-rose-50/40'} text-xs sm:text-sm">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-bold text-[10px]">
+                            ${item.questionObj.chapter}
+                        </span>
+                        <span class="font-bold flex items-center gap-1 ${item.isCorrect ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${item.isCorrect ? '<i class="fa-solid fa-circle-check"></i> 正解' : '<i class="fa-solid fa-circle-xmark"></i> 不正解'}
+                        </span>
+                    </div>
+
+                    <div class="font-bold text-slate-800 mb-2 leading-relaxed">
+                        Q. ${escapeHtml(item.questionObj.q)}
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 text-xs">
+                        <div>
+                            <span class="text-slate-400 block text-[10px]">あなたの回答</span>
+                            <span class="${item.isCorrect ? 'text-slate-700 font-medium' : 'text-rose-600 font-bold'}">
+                                ${escapeHtml(item.selected)}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[10px]">正解</span>
+                            <span class="text-emerald-700 font-bold">
+                                ${escapeHtml(item.questionObj.a)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter Review Tabs Handler
+        function filterReview(filter) {
+            ['all', 'wrong', 'correct'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (f === filter) {
+                    btn.className = "px-2.5 py-1 rounded-md transition-all bg-white shadow-sm font-bold text-slate-800";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-md transition-all text-slate-500 hover:text-slate-800";
+                }
+            });
+
+            document.getElementById('review-list').innerHTML = generateReviewListHTML(filter);
+        }
+
+        // Start on page load
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
